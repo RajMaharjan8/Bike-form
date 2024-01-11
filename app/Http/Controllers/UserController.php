@@ -47,8 +47,10 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|unique:users|email',
             'role' => 'required',
-            'password' => 'required|confirmed',
+            'password' => 'required|confirmed|regex:/[0-9]/',
             'password_confirmation'=>'required'
+        ], [
+            'password.regex' => 'The password must contain at least one number.'
         ]);
 
         User::create([
