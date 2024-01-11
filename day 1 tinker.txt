@@ -1,0 +1,42 @@
+php artisan tinker
+$user = App\Models\User::where('name', 'John')->first();
+$user = App\Models\User::where('email', 'admin@admin.com')->first();  
+
+$user->password = Hash::make('newpassword'); 
+
+//for changing password for admin using tinker
+-------------------------------------------------------
+All voyeger files will be at vendor/tcg/voyeger
+
+------------------------------------------------------
+.gitignore
+
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+.htaccess
+--------------------------------------------------
+in web.php after adding voyeger
+
+Route::group(['prefix' => 'admin'], function(){
+    Voyager::routes();
+});
+
+
+

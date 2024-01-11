@@ -16,7 +16,7 @@ class UserController extends Controller
     public function login(Request $req){
         try {
             $req->validate([
-                'email' => 'required',
+                'email' => 'required|email',
                 'password' => 'required'
             ]);
     
@@ -73,11 +73,7 @@ class UserController extends Controller
 
 public function getContactPage(){
     $user = Session::get('user');
-
-    // Check if the user variable is set
     if (!$user) {
-        // Handle the case when the user variable is not set (redirect, display an error, etc.)
-        // For example, you can redirect the user to the login page:
         return redirect()->route('login')->with('error', 'Please log in to access the contact page.');
     }
 

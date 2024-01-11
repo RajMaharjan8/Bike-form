@@ -26,47 +26,47 @@ use App\Http\Controllers\BookingController;
 Route::group (['middleware'=>'web'],function(){
 
     Route::group(['prefix' => 'admin'], function(){
-    Voyager::routes();
-});
+        Voyager::routes();
+    });
 
-Route::get('/login',function(){
-    return view('login');
-});
+    Route::get('/login',function(){
+        return view('login');
+    });
 
-Route::get('/',function(){
-    return view('home');
-});
+    Route::get('/',function(){
+        return view('home');
+    });
 
-Route::get('/register',function(){
-    return view('register');
-});
-// Route::get('/contact',function(){
-//     return view('contact');
-// });
+    Route::get('/register',function(){
+        return view('register');
+    });
+    // Route::get('/contact',function(){
+    //     return view('contact');
+    // });
 
-Route::get('/contact', [UserController::class, 'getContactPage']);
-Route::get('/bookingform', function(){
-    return view('bookingForm');
-});
-
-
-Route::post('/login', [UserController::class,'login']);
-Route::post('/register', [UserController::class,'register']);
-Route::post('/contact',[UserController::class,'contact']);
-Route::post('/booking',[BookingController::class,'booking']);
+    Route::get('/contact', [UserController::class, 'getContactPage']);
+    Route::get('/bookingform', function(){
+        return view('bookingForm');
+    });
 
 
+    Route::post('/login', [UserController::class,'login']);
+    Route::post('/register', [UserController::class,'register']);
+    Route::post('/contact',[UserController::class,'contact']);
+    Route::post('/booking',[BookingController::class,'booking']);
 
-// Route::get('/logout', function(){
-//     Session::forget('user');
-//     return redirect('/login');
-// });
 
-Route::get('/logout', function(){
+
+    // Route::get('/logout', function(){
+    //     Session::forget('user');
+    //     return redirect('/login');
+    // });
+
+    Route::get('/logout', function(){
         Auth::logout();
         Session::flush();
         return redirect('/login');
-});
+    }); 
 
 // Route::get('/logout',[UserController::class, 'logout']);
 

@@ -15,18 +15,18 @@ class BookingController extends Controller
             $req->validate([
                 'name'=> 'required',
                 'email'=> 'required|email',
-                'phone'=>'required|min:10',
+                'phone'=>'required|min:10|max:10',
             ]);
             $image = $req->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $imageName);
+            $image->move(public_path('storage/booking/'), $imageName);
 
             Booking::insert([
                 'user_id'=> $req->user_id,
                 'name'=> $req->name,
                 'price'=> $req->price,
                 'phone'=> $req->phone,
-                'image'=>$imageName
+                'image'=>('booking/'.$imageName),
             ]);
             return view('bookingform',[
                 'message'=>'Your booking has been successfully done'

@@ -5,8 +5,14 @@ use Illuminate\Support\Facades\Session;
 $user = Session::get('user'); 
 ?>
 
-{{ View::make('nav') }}
 
+{{ View::make('nav') }}
+@if(isset($message))
+<div class="alert" role="alert" id="successAlert">
+  {{ $message }}
+</div>
+@endif
+  
 
 <h2>Book Now</h2>
 
@@ -38,4 +44,24 @@ $user = Session::get('user');
     <input type="hidden" name="user_id" value="{{ $user['id'] }}">
     <input type="submit" value="BOOK">
 </form>
+
+<style>
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #4CAF50;
+      border-radius: 4px;
+      color: #4CAF50;
+      background-color: #E6F4E6;
+    }
+  </style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var alertElement = document.getElementById("successAlert");
+      setTimeout(function() {
+        alertElement.style.display = "none";
+      }, 2000);
+    });
+  </script>
+
 @endsection

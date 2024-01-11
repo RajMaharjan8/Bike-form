@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Session;
 $user = Session::get('user'); 
 ?>
 
+@if(isset($message))
+<div class="alert" role="alert" id="successAlert">
+  {{ $message }}
+</div>
+@endif
 
 <h3>Contact Us</h3>
 <div class="container">
@@ -36,4 +41,13 @@ $user = Session::get('user');
    
 
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var alertElement = document.getElementById("successAlert");
+      setTimeout(function() {
+        alertElement.style.display = "none";
+      }, 2000);
+    });
+  </script>
 @endsection
