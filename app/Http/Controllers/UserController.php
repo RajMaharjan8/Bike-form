@@ -14,6 +14,12 @@ class UserController extends Controller
 {
     //
     public function login(Request $req){
+        try {
+            $req->validate([
+                'email' => 'required',
+                'password' => 'required'
+            ]);
+    
         $user = User::where(['email'=>$req->email])->first();
         if($user || Hash::check($req->password, $user->password)){
             $req->session()->put('user',$user);
@@ -24,6 +30,14 @@ class UserController extends Controller
                 'message'=>'Email and password doesnt match'
             ]);
         } 
+    } catch (ValidationException $e) {
+        return redirect('/login')->withErrors($e->errors());
+    } catch (\Throwable $th) {
+        return response()->json([
+            'message' => 'An internal error has occurred'
+        ], 500);
+    }
+        
     }
 
     public function register(Request $req)
@@ -33,7 +47,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|unique:users|email',
             'role' => 'required',
-            'password' => 'required|confirmed'
+            'password' => 'required|confirmed',
+            'password_confirmation'=>'required'
         ]);
 
         User::create([
@@ -46,20 +61,15 @@ class UserController extends Controller
         $req->session()->put('user',$user);
         return redirect('/');
         
-    } catch (\Exception $e) {
+    } catch (ValidationException $e) {
+        return redirect('/register')->withErrors($e->errors());
+    } catch (\Throwable $th) {
         return response()->json([
             'message' => 'An internal error has occurred'
         ], 500);
     }
 }
 
-// public function getContactPage(){
-//     $user = Session::get('user');
-//     // return $user;
-//     return view('contact',[
-//         'user'=> $user
-//     ]);
-// }
 
 public function getContactPage(){
     $user = Session::get('user');

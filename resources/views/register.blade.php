@@ -10,6 +10,9 @@
                         <div class="form-group">
                             <label for="name">Name:</label>
                             <input type="text" name='name' class="form-control" id="name">
+                            @error('name')
+                        <p style="color: red;">{{ $message }}</p>
+                        @enderror
                         </div>
 
                         <div class="mb-3">
@@ -21,20 +24,32 @@
                               
                                 </select>
                             </div>
+                        @error('role')
+                        <p style="color: red;">{{ $message }}</p>
+                        @enderror
 
                     <div class="mb-3">
                         <label for="exampleInputEmail1" class="form-label">Email address</label>
                         <input type="email" name="email"  class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                        @error('email')
+                        <p style="color: red;">{{ $message }}</p>
+                        @enderror
                         
                     <div class="mb-3">
                         <label for="exampleInputPassword1" class="form-label">Password</label>
                         <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+                        @error('password')
+                        <p style="color: red;">{{ $message }}</p>
+                        @enderror
                     </div>
 
             
                     <div class="form-group">
                         <label for="password_confirmation">Confirm Password:</label>
                         <input type="password" name="password_confirmation" class="form-control" id="password_confirmation">
+                        @error('password_confirmation')
+                        <p style="color: red;">{{ $message }}</p>
+                        @enderror
                     </div>
                     <button type="submit" class="btn btn-primary">Register</button>
                 </form>
