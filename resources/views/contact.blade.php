@@ -16,7 +16,7 @@ $user = Session::get('user');
 
 <h3>Contact Us</h3>
 <div class="container">
-    <form action="/contact" method="POST">
+    <form action="{{route('contact')}}" method="POST">
         @csrf
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" placeholder="{{$user['name']}}">

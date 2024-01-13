@@ -18,58 +18,48 @@ use App\Http\Controllers\BookingController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
+
+Route::get('login', function () {
+    if (session()->has('user')) {
+        return redirect(route('home'));
+    } else {
+        return view('login');
+    }
+})->name('login');
+
+Route::get('/', function () {
+    return view('home');
+})->name('home')->middleware('guard');
+
+Route::get('register', function () {
+    return view('register');
+})->name('register');
+
+Route::get('contactform', [UserController::class, 'getContactPage'])->name('contactform')->middleware('guard');
+Route::get('bookingform', function () {
+    return view('bookingForm');
+})->name('bookingform')->middleware('guard');
+
+
+Route::post('getuser', [UserController::class, 'login'])->name('login.post');
+Route::post('newuser', [UserController::class, 'register'])->name('register.post');
+Route::post('contact', [UserController::class, 'contact'])->name('contact');
+Route::post('booking', [BookingController::class, 'booking'])->name('booking');
+Route::post('verify', [UserController::class, 'verifyUser'])->name('verify');
+
+Route::get('validationform', function () {
+    return view('validateForm');
+})->name('validationform');
+
+
+Route::get('logout', function () {
+    Auth::logout();
+    Session::flush();
+    return redirect('login');
+})->name('logout');
+
 // });
 
-
-Route::group (['middleware'=>'web'],function(){
-
-    Route::group(['prefix' => 'admin'], function(){
-        Voyager::routes();
-    });
-
-    Route::get('/login',function(){
-        return view('login');
-    });
-
-    Route::get('/',function(){
-        return view('home');
-    });
-
-    Route::get('/register',function(){
-        return view('register');
-    });
-    // Route::get('/contact',function(){
-    //     return view('contact');
-    // });
-
-    Route::get('/contact', [UserController::class, 'getContactPage']);
-    Route::get('/bookingform', function(){
-        return view('bookingForm');
-    });
-
-
-    Route::post('/login', [UserController::class,'login']);
-    Route::post('/register', [UserController::class,'register']);
-    Route::post('/contact',[UserController::class,'contact']);
-    Route::post('/booking',[BookingController::class,'booking']);
-
-
-
-    // Route::get('/logout', function(){
-    //     Session::forget('user');
-    //     return redirect('/login');
-    // });
-
-    Route::get('/logout', function(){
-        Auth::logout();
-        Session::flush();
-        return redirect('/login');
-    }); 
-
-// Route::get('/logout',[UserController::class, 'logout']);
-
-
-
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
 });
