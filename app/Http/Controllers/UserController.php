@@ -245,7 +245,7 @@ class UserController extends Controller
             ], 500);
         }
     }
-    
+
     public function changePassword(Request $req)
     {
         try {
@@ -259,13 +259,16 @@ class UserController extends Controller
             $userId = $req->get('user_id');
 
             $findUser = User::find($userId);
-
-            // Checking if the new password is different from the stored password
+            // if (!Hash::check($password, $findUser->password)) {
             if (!Hash::check($password, $findUser->password)) {
                 $findUser->update(['password' => Hash::make($password)]);
-                return 'Password successfully changed';
+                return redirect()->route('login')->with('success', 'Now You can Login using your credentials');
             } else {
-                return 'Already have the same password';
+                // return redirect()->route('changepassword')->with('error', 'Already have the same password');
+                return view('/changepassword', [
+                    'user' => $findUser,
+                    'error' => 'Already have the same password'
+                ]);
             }
         } catch (ValidationException $e) {
             return redirect('/changepassword')->withErrors($e->errors())->withInput();
@@ -303,10 +306,12 @@ class UserController extends Controller
                 $otp->update(['valid' => false]);
                 $findUser->update(['email_verified_at' => now()]);
 
-                return response()->json([
-                    'message' => 'Email verification successful',
-                ], 200);
-                // return view(route('home'));
+                // return response()->json([
+                //     'message' => 'Email verification successful',
+                // ], 200);
+
+                $req->session()->put('user', $findUser);
+                return redirect(route('home'));
             } else {
                 return response()->json([
                     'message' => 'Invalid OTP',

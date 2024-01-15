@@ -32,6 +32,13 @@
 
 @extends('master')
 @section('content')
+
+@if(session('success'))
+<div class="alert alert-success" role="alert" id="successAlert">
+    {{ session('success') }}
+</div>
+@endif
+
     <div class="container">
         <h3 class="mt-5 mb-4 text-center">LOGIN</h3>
         <div class="row">
