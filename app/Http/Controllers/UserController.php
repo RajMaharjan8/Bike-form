@@ -157,11 +157,118 @@ class UserController extends Controller
                     ->subject('User Verification');
             });
 
-            return view(route('validateform'), [
+            return view('validateForm', [
                 'user' => $user
             ]);
         } catch (ValidationException $e) {
             return redirect('/register')->withErrors($e->errors())->withInput();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'An internal error has occurred',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function forgetpassword(Request $req)
+    {
+        $req->validate([
+            'email' => 'required|email',
+        ]);
+        $enter_email = $req->email;
+        $user_data = User::where('email', $enter_email)->first();
+
+        if ($user_data) {
+            if ($user_data->email_verified_at !== null) {
+                $otp = OptService::generate($user_data->email, 6, 30);
+                Mail::send('emails.forgetotp', ['otp' => $otp], function ($mailable) use ($user_data) {
+                    $mailable->to($user_data->email)
+                        ->subject('User Verification');
+                });
+                return view('forgetValidateForm', [
+                    'user' => $user_data
+                ]);
+            } else {
+                return 'not able';
+            }
+        } else {
+            return 'no data';
+        }
+    }
+
+    public function forgetPasswordOtpVerify(Request $req)
+    {
+        try {
+            $userId = $req->user_id;
+            $findUser = User::find($userId);
+
+            if (!$findUser) {
+                return response()->json([
+                    'message' => 'User not found',
+                ], 404);
+            }
+
+            $getEmail = $findUser->email;
+
+            // $otp = ModelsOtp::where('identifier', $getEmail)
+            //     ->where('valid', 1)
+            //     ->first();
+
+            $otp = ModelsOtp::where('identifier', $getEmail)
+                ->latest('updated_at')  // Order by updated_at in descending order
+                ->first();
+
+
+            $enteredOtp = $req->input('otp');
+
+            if ($otp && $otp->token === $enteredOtp) {
+                $otp = ModelsOtp::find($otp->id);
+                $otp->update(['valid' => false]);
+                // redirecting to change passowrd page
+                return view('changepassword', [
+                    'user' => $findUser
+                ]);
+
+                // return view('changepassword', ['user' => $findUser]);
+
+
+                // return view(route('home'));
+            } else {
+                return response()->json([
+                    'message' => 'Invalid OTP',
+                ], 422);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'An internal error has occurred',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+    }
+    
+    public function changePassword(Request $req)
+    {
+        try {
+            $req->validate([
+                'password' => 'required|confirmed',
+                'password_confirmation' => 'required'
+            ]);
+
+            $password = $req->get('password');
+            $confirmPassword = $req->get('password_confirmation');
+            $userId = $req->get('user_id');
+
+            $findUser = User::find($userId);
+
+            // Checking if the new password is different from the stored password
+            if (!Hash::check($password, $findUser->password)) {
+                $findUser->update(['password' => Hash::make($password)]);
+                return 'Password successfully changed';
+            } else {
+                return 'Already have the same password';
+            }
+        } catch (ValidationException $e) {
+            return redirect('/changepassword')->withErrors($e->errors())->withInput();
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => 'An internal error has occurred',
@@ -193,7 +300,6 @@ class UserController extends Controller
 
             if ($otp && $otp->token === $enteredOtp) {
                 $otp = ModelsOtp::find($otp->id);
-                // dd($otp);
                 $otp->update(['valid' => false]);
                 $findUser->update(['email_verified_at' => now()]);
 

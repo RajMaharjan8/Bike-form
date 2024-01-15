@@ -47,10 +47,27 @@ Route::post('contact', [UserController::class, 'contact'])->name('contact');
 Route::post('booking', [BookingController::class, 'booking'])->name('booking');
 Route::post('verify', [UserController::class, 'verifyUser'])->name('verify');
 
-Route::get('validationform', function () {
+Route::get('validateForm', function () {
     return view('validateForm');
-})->name('validationform');
+});
 
+Route::get('forget', function () {
+    return view('forget');
+})->name('forget');
+
+Route::post('forgetpassword', [UserController::class, 'forgetpassword']);
+
+Route::get('forgetValidateForm', function () {
+    return view('forgetValidateForm');
+});
+
+Route::post('forgetpasswordotp', [UserController::class, 'forgetPasswordOtpVerify'])->name('forgetpasswordotp');
+
+Route::get('changepassword', function () {
+    return view('changepassword');
+});
+
+Route::post('changingpassword', [UserController::class, 'changePassword'])->name('changingpassword');
 
 Route::get('logout', function () {
     Auth::logout();

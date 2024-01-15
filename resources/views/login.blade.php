@@ -61,6 +61,9 @@
 
                     <button type="submit" class="btn btn-primary">Login</button>
                 </form>
+                <div class="text-center mt-3">
+                    <a href="{{route('forget')}}" class="btn btn-link">forgot password</a>
+                </div>
             </div>
         </div>
 
