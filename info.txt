@@ -1,0 +1,14 @@
+FCM is used for generating token
+
+Installation:-
+composer require code-lts/laravel-fcm
+php artisan vendor:publish --provider=LaravelFCM\FCMServiceProvider
+
+
+Changing the password
+php artisan tinker
+$user = App\Models\User::where('email', 'user@example.com')->first();
+$user->password = bcrypt('newpassword');
+
+
+

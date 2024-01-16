@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Observers\OptService;
 use Ichtrojan\Otp\Models\Otp;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -63,12 +64,56 @@ class ApiUserController extends Controller
         }
     }
 
+    // public function verifyOtpApi(Request $req)
+    // {
+    //     $validator = Validator::make($req->all(), [
+    //         'otp' => ['required'],
+    //         'email' => ['required']
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'message' => 'Failed to meet the requirement. Enter otp and email',
+    //             'errors' => $validator->errors()
+    //         ], 400);
+    //     }
+
+    //     $entered_otp = $req->input('otp');
+    //     $entered_email = $req->input('email');
+    //     $user_otp_data = Otp::where('identifier', $entered_email)
+    //         ->where('valid', 1)
+    //         ->first();
+    //     $user_data = User::where('email', $entered_email)->first();
+    //     $stored_otp = $user_otp_data->token;
+    //     try {
+    //         // if ($entered_otp === $stored_otp ) {
+    //         if ($entered_otp === $stored_otp) {
+
+    //             $user_otp_data->update(['valid' => false]);
+    //             $user_data->update(['email_verified_at' => now()]);
+
+    //             // $user = User::create($data);
+    //             $token = $user_data->createToken('app')->accessToken;
+    //             // dd($token->token);
+    //             $user_data->update(['remember_token' => $token->token]);
+    //             return response()->json(
+    //                 [
+    //                     'token' => $token->token,
+    //                     'message' => 'Your Account Has Been Verified.'
+    //                 ]
+    //             );
+    //         }
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
     public function verifyOtpApi(Request $req)
     {
         $validator = Validator::make($req->all(), [
             'otp' => ['required'],
             'email' => ['required']
         ]);
+
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Failed to meet the requirement. Enter otp and email',
@@ -83,26 +128,44 @@ class ApiUserController extends Controller
             ->first();
         $user_data = User::where('email', $entered_email)->first();
         $stored_otp = $user_otp_data->token;
-        try {
-            if ($entered_otp === $stored_otp) {
-                $user_otp_data->update(['valid' => false]);
-                $user_data->update(['email_verified_at' => now()]);
 
-                // $user = User::create($data);
-                $token = $user_data->createToken('app')->accessToken;
-                // dd($token->token);
-                $user_data->update(['remember_token' => $token->token]);
-                return response()->json(
-                    [
+        try {
+            if ($entered_otp === $stored_otp && $user_otp_data->valid !== false) {
+                $now = now();
+                $validity = $user_otp_data->created_at->addSeconds($user_otp_data->validity);
+
+                if ($now->greaterThan($validity)) {
+                    $user_otp_data->valid = true;
+                    $user_otp_data->save();
+
+                    return (object)[
+                        'status' => false,
+                        'message' => 'OTP Expired'
+                    ];
+                } else {
+                    $user_otp_data->update(['valid' => false]);
+                    $user_data->update(['email_verified_at' => now()]);
+
+                    $token = $user_data->createToken('app')->accessToken;
+
+                    $user_data->update(['remember_token' => $token->token]);
+
+                    return response()->json([
                         'token' => $token->token,
                         'message' => 'Your Account Has Been Verified.'
-                    ]
-                );
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid OTP or OTP has already been used.'
+                ]);
             }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
 
     public function fetch(Request $req)

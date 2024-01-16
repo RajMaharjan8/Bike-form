@@ -11,6 +11,8 @@ class OptService
     public static function generate(string $email, int $digits = 4, int $validity = 1440): object
     {
         Otp::where('identifier', $email)->where('valid', 0)->delete();
+        // Otp::where('identifier', $email)->where('valid', false)->delete();
+
 
         $token = str_pad(self::generatePin(), 4, '0', STR_PAD_LEFT);
 
@@ -42,10 +44,9 @@ class OptService
      * @return mixed
      */
 
-    public static function validate(string $email, string $token, $change = true): object
+    public static function validate(string $email, string $token, $change = 0): object
     {
         $otp = Otp::where('identifier', $email)->where('token', $token)->first();
-
 
         if ($otp == null) {
             return (object)[
@@ -53,10 +54,12 @@ class OptService
                 'message' => 'OTP is not valid'
             ];
         } else {
-            if ($otp->valid == true) {
+            if ($otp->valid == 0) {
                 $carbon = new Carbon();
                 $now = $carbon->now();
+                // $validity = $otp->created_at->addMinutes($otp->validity);
                 $validity = $otp->created_at->addMinutes($otp->validity);
+
 
                 if (strtotime($validity) < strtotime($now)) {
                     $otp->valid = false;
@@ -68,7 +71,7 @@ class OptService
                     ];
                 } else {
                     if ($change) {
-                        $otp->valid = false;
+                        $otp->valid = 1;
                         $otp->save();
                     }
                     return (object)[
