@@ -26,6 +26,7 @@ class User extends \TCG\Voyager\Models\User
         'password',
         'email_verified_at', 
         'verification_token',
+        'remember_token',
     ];
 
     /**

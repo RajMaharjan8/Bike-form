@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::post('create', [ApiUserController::class, 'create']);
+// Route::get('fetch/{id}', [ApiUserController::class, 'fetch']);
+Route::post('fetch', [ApiUserController::class, 'fetch'])->middleware('api.auth');
+Route::get('getRegistered', [ApiUserController::class, 'getAllRegistered']);
+// ->middleware('api.auth');
+Route::post('apilogin', [ApiUserController::class, 'apiLogin']);
+Route::post('forgetPasswordEmail', [ApiUserController::class, 'forgetPasswordEmail']);
+Route::post('verifyOptForgetPassword', [ApiUserController::class, 'verifyOptForgetPassword']);
+Route::post('changePassword', [ApiUserController::class, 'changePassword']);
+Route::post('verifyUser', [ApiUserController::class, 'verifyOtpApi']);
+Route::post('apilogout', [ApiUserController::class, 'apiLogout']);
