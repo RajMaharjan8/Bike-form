@@ -280,7 +280,6 @@ class UserController extends Controller
         }
     }
 
-
     public function verifyUser(Request $req)
     {
         try {
@@ -305,11 +304,9 @@ class UserController extends Controller
                 $otp = ModelsOtp::find($otp->id);
                 $otp->update(['valid' => false]);
                 $findUser->update(['email_verified_at' => now()]);
-
                 // return response()->json([
                 //     'message' => 'Email verification successful',
                 // ], 200);
-
                 $req->session()->put('user', $findUser);
                 return redirect(route('home'));
             } else {

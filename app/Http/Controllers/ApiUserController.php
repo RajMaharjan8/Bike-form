@@ -41,8 +41,6 @@ class ApiUserController extends Controller
             DB::beginTransaction();
             try {
                 $user = User::create($data);
-                // $token = $user->createToken('app')->accessToken;
-                // dd($token->token);
 
                 $otp = OptService::generate($user->email, 6, 30);
 
@@ -133,7 +131,8 @@ class ApiUserController extends Controller
             if ($entered_otp === $stored_otp && $user_otp_data->valid !== false) {
                 $now = now();
                 $validity = $user_otp_data->created_at->addSeconds($user_otp_data->validity);
-
+                //false = 0
+                //true = 1
                 if ($now->greaterThan($validity)) {
                     $user_otp_data->valid = true;
                     $user_otp_data->save();
@@ -166,8 +165,6 @@ class ApiUserController extends Controller
         }
     }
 
-
-
     public function fetch(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -180,8 +177,6 @@ class ApiUserController extends Controller
                 'errors' => $validator->errors()
             ], 400);
         }
-
-
         $id = $req->input('id');
         $user = User::find($id);
         if (is_null($user)) {
@@ -309,11 +304,25 @@ class ApiUserController extends Controller
             $user_data = User::where('email', $entered_email)->first();
             $stored_otp = $user_otp_data->token;
             if ($entered_otp === $stored_otp) {
-                $user_otp_data->update(['valid' => false]);
-                $user_data->update(['email_verified_at' => now()]);
-                return response()->json([
-                    'message' => 'Otp verified. You can now set up your new password.'
-                ]);
+                $now = now();
+                $validity = $user_otp_data->created_at->addSeconds($user_otp_data->validity);
+                //false = 0
+                //true = 1
+                if ($now->greaterThan($validity)) {
+                    $user_otp_data->valid = true;
+                    $user_otp_data->save();
+
+                    return (object)[
+                        'status' => false,
+                        'message' => 'OTP Expired'
+                    ];
+                } else {
+                    $user_otp_data->update(['valid' => false]);
+                    $user_data->update(['email_verified_at' => now()]);
+                    return response()->json([
+                        'message' => 'Otp verified. You can now set up your new password.'
+                    ]);
+                }
             } else {
                 return response()->json([
                     'message' => 'Encorrect Otp. Please try again.'
@@ -341,9 +350,11 @@ class ApiUserController extends Controller
             $new_password = $req->input('new_password');
             $confirm_password = $req->input('confirm_password');
             $entered_email = $req->input('email');
-            $user_data = $user_data = User::where('email', $entered_email)->first();
+            $user_data = User::where('email', $entered_email)->first();
+            $user_otp_data = Otp::where('identifier', $entered_email)
+                ->first();
 
-            if (!Hash::check($new_password, $user_data->password)) {
+            if (!Hash::check($new_password, $user_data->password) && $user_otp_data->valid === 0) {
                 $user_data->update(['password' => Hash::make($new_password)]);
                 return response()->json([
                     'message' => 'Your password has been successfully changed.'
