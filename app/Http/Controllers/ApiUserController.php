@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FCM;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Observers\OptService;
@@ -42,7 +43,7 @@ class ApiUserController extends Controller
             try {
                 $user = User::create($data);
 
-                $otp = OptService::generate($user->email, 6, 30);
+                $otp = OptService::generate($user->email, 6, 120);
 
                 Mail::send('emails.display', ['otp' => $otp], function ($mailable) use ($user) {
                     $mailable->to($user->email)
@@ -144,10 +145,19 @@ class ApiUserController extends Controller
                 } else {
                     $user_otp_data->update(['valid' => false]);
                     $user_data->update(['email_verified_at' => now()]);
-
+                    $user_id = $user_data->id;
                     $token = $user_data->createToken('app')->accessToken;
 
                     $user_data->update(['remember_token' => $token->token]);
+
+                    $fcm_token = $user_data->createToken('app')->accessToken;
+
+                    //device token
+                    $fcm_data = new FCM([
+                        'token' => $fcm_token->token,
+                        'user_id' => $user_id,
+                    ]);
+                    $fcm_data->save();
 
                     return response()->json([
                         'token' => $token->token,
@@ -203,7 +213,8 @@ class ApiUserController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    function apiLogin(Request $req)
+
+    public function apiLogin(Request $req)
     {
         try {
             $validator = Validator::make($req->all(), [
@@ -220,7 +231,8 @@ class ApiUserController extends Controller
             $user = User::where('email', $req->email)->where('email_verified_at', '!=', null)->get();
 
             if (count($user) > 0) {
-                $user = $user->first(); // Get the first user from the collection
+                $user = $user->first();
+                $user_id = $user->id; // Get the first user from the collection
 
                 if ($user->remember_token !== null) {
                     $response = [
@@ -230,9 +242,9 @@ class ApiUserController extends Controller
                     $token = $user->createToken('app')->accessToken;
                     $user->update(['remember_token' => $token->token]);
 
-                    //putting api token in session for middleware 
-                    // Session::put('api_token', $token->token);
-                    $response = [
+
+
+                    $$response = [
                         'message' => 'You are now logged in',
                         'token' => $token->token,
                         'data' => $user,

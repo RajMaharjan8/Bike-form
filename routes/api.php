@@ -21,8 +21,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('create', [ApiUserController::class, 'create']);
 // Route::get('fetch/{id}', [ApiUserController::class, 'fetch']);
-Route::post('fetch', [ApiUserController::class, 'fetch'])->middleware('api.auth');
-Route::get('getRegistered', [ApiUserController::class, 'getAllRegistered']);
+
+Route::middleware(['api.auth'])->group(function () {
+    Route::post('fetch', [ApiUserController::class, 'fetch']);
+    Route::get('getRegistered', [ApiUserController::class, 'getAllRegistered']);
+});
+// Route::post('fetch', [ApiUserController::class, 'fetch'])->middleware('api.auth');
+// Route::get('getRegistered', [ApiUserController::class, 'getAllRegistered']);
 // ->middleware('api.auth');
 Route::post('apilogin', [ApiUserController::class, 'apiLogin']);
 Route::post('forgetPasswordEmail', [ApiUserController::class, 'forgetPasswordEmail']);
