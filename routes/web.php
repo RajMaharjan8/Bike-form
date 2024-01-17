@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ProductController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,19 +29,30 @@ Route::get('login', function () {
     }
 })->name('login');
 
-Route::get('/', function () {
-    return view('home');
-})->name('home')->middleware('guard');
+// Route::get('/', function () {
+//     return view('home');
+// })->name('home')->middleware('guard');
+
+Route::get('/', [ProductController::class, 'getHome'])->name('home')->middleware('guard');
 
 Route::get('register', function () {
     return view('register');
 })->name('register');
 
 Route::get('contactform', [UserController::class, 'getContactPage'])->name('contactform')->middleware('guard');
-Route::get('bookingform', function () {
-    return view('bookingForm');
-})->name('bookingform')->middleware('guard');
+// Route::get('bookingform', function () {
+//     return view('bookingForm');
+// })->name('bookingform')->middleware('guard');
 
+Route::get('bookingform/{id}', [ProductController::class, 'getBookingForm'])->name('bookingform')->middleware('guard');
+
+
+
+Route::get('addItem', function () {
+    return view('addItemForm');
+})->middleware('guard');
+
+Route::post('addnewitem', [ProductController::class, 'addItem'])->name('addnewitem');
 
 Route::post('getuser', [UserController::class, 'login'])->name('login.post');
 Route::post('newuser', [UserController::class, 'register'])->name('register.post');

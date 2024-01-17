@@ -15,9 +15,10 @@ $user = Session::get('user');
   
 
 <h2>Book Now</h2>
+{{-- <img src="/storage/{{$data['image']}}" alt="{{$data['name']}}" style="height:350px"> --}}
+<img src="{{ asset('storage/' . $data['image']) }}" alt="{{ $data['name'] }}" style="height:350px">
 
-<img src="images/bike02.png" alt="Product Image" style="height:350px">
-<form action="/booking" method="POST" enctype="multipart/form-data">
+<form action="{{route('booking')}}" method="POST" enctype="multipart/form-data">
     @csrf
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" placeholder="{{ $user['name'] }}">
@@ -40,10 +41,13 @@ $user = Session::get('user');
     <label for="image">Upload Image:</label>
     <input type="file" id="image" name="image" accept="image/*">
 
-    <input type="hidden" name='price' value="40000">
+    <input type="hidden" name='price' value="{{$data['price']}}">
+    <input type="hidden" name='prod_id' value="{{$data['id']}}">
+    <p>{{$data['price']}}</p>
     <input type="hidden" name="user_id" value="{{ $user['id'] }}">
     <input type="submit" value="BOOK">
 </form>
+
 
 <style>
     .alert {

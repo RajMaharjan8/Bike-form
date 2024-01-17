@@ -24,8 +24,10 @@ Route::post('create', [ApiUserController::class, 'create']);
 
 Route::middleware(['api.auth'])->group(function () {
     Route::post('fetch', [ApiUserController::class, 'fetch']);
-    Route::get('getRegistered', [ApiUserController::class, 'getAllRegistered']);
+    Route::post('getRegistered', [ApiUserController::class, 'getAllRegistered']);
 });
+
+
 // Route::post('fetch', [ApiUserController::class, 'fetch'])->middleware('api.auth');
 // Route::get('getRegistered', [ApiUserController::class, 'getAllRegistered']);
 // ->middleware('api.auth');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserCollection;
 use App\Models\FCM;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -204,11 +205,26 @@ class ApiUserController extends Controller
         return response()->json($response, 200);
     }
 
-    public function getAllRegistered()
+    public function getAllRegistered(Request $req)
     {
         try {
-            $data = User::where('email_verified_at', '!=', null)->get();
-            return response()->json(['message' => $data]);
+            $validator =  Validator::make($req->all(), [
+                'email' => ['required']
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Enter the email',
+                    'errors' => $validator->errors()
+                ], 400);
+            }
+
+            // $data = User::where('email_verified_at', '!=', null)->get();
+            $data = User::where('email_verified_at', '!=', null)->paginate(3);
+
+
+            $collection = new UserCollection($data);
+
+            return response()->json(['message' => $collection]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

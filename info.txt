@@ -11,4 +11,89 @@ $user = App\Models\User::where('email', 'user@example.com')->first();
 $user->password = bcrypt('newpassword');
 
 
+-----------For Otp generating-------------
+"ichtrojan/laravel-otp"
+this package was used 
+
+then OptService.php was created as Observer
+(php artisan make:observer OptService)
+
+the ichtrojan creates an model 'otp' and then uses it for entering data 
+ichtrojan automatically creates the database table otp
+use Ichtrojan\Otp\Models\Otp;
+
+
+
+-------------PAGINATION--------------------
+php artisan make:resource UserCollection
+php artisan make:resource UserResource
+
+collection ->(data)-> resource 
+resource then returns what value to be shown or display
+
+-----------------------------------
+UserCollection extends BaseCollecion
+------UserCollection code--------:
+class UserCollection extends BaseCollection
+{
+   
+    public function toArray($request)
+    {
+        return [
+            'data' => UserResource::collection($this->collection), //sending data to the UserResource
+            'addtional_information' => $this->paginate(), 
+            'more_informarion' => $this->next_paginate()
+
+        ];
+    }
+}
+
+
+fontend code:: 
+$data = User::where('email_verified_at', '!=', null)->paginate(3);
+$collection = new UserCollection($data);
+return response()->json(['message' => $collection]);
+--------------------------------------
+-------BaseCollection code-----------:
+class BaseCollection extends ResourceCollection
+{
+    public function paginate()
+    {
+        return [
+            'total' => $this->total(),
+            'current' => $this->currentPage(),
+            'last' => $this->lastPage(),
+            'elements_in_each_page' => $this->perPage()
+        ];
+    }
+//NOTE: total(), currentPage(), etc are the functions that are provided by the laravel pagination.//
+
+    public function next_paginate()
+    {
+        return [
+            'this_is_next_page_url' => $this->nextPageUrl()
+        ];
+    }
+}
+
+-----------------------------------------
+---------UserResource-----------------:
+class UserResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'mail' => $this->email
+        ];
+    }
+}
+
+//Note: this shows/sends only the things that we want
+
+---------------------------------------------------------------
+COLLECTION BATA RESOURCE MA PATHAUXA ANI TESPAXI API MA LOAD HUNXA
+
+
 

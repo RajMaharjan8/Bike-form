@@ -2,42 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class BookingController extends Controller
+class ProductController extends Controller
 {
     //
-    public function booking(Request $req)
+    public function getHome()
+    {
+        $all_prod = Product::paginate(3);
+
+        return view('home', [
+            'data' => $all_prod
+        ]);
+    }
+
+    public function getBookingForm($id)
+    {
+        $data = Product::find($id)->toArray();
+        return view('bookingForm', [
+            'data' => $data
+        ]);
+
+        // dd($data);
+    }
+    public function addItem(Request $req)
     {
         try {
-
             $req->validate([
                 'name' => 'required',
-                'email' => 'required|email',
+                'price' => 'required',
                 'phone' => 'required|min:10|max:10',
             ]);
             $image = $req->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('storage/booking/'), $imageName);
+            $image->move(public_path('storage/product/'), $imageName);
 
-            Booking::insert([
+            Product::create([
                 'user_id' => $req->user_id,
                 'name' => $req->name,
                 'price' => $req->price,
+                'description' => $req->description,
                 'phone' => $req->phone,
-                'image' => ('booking/' . $imageName),
+                'image' => ('product/' . $imageName),
             ]);
-
-            $id = $req->prod_id;
-            $prod_data = Product::find($id);
-            // dd($prod_data);
-            return view('bookingform', [
-                'message' => 'Your booking has been successfully done',
-                'data' => $prod_data
-            ]);
+            return view('addItemForm');
         } catch (ValidationException $e) {
             return redirect('/bookingform')->withErrors($e->errors());
         } catch (\Throwable $th) {
@@ -45,6 +57,5 @@ class BookingController extends Controller
                 'message' => 'An internal error has occurred'
             ], 500);
         }
-        // return $req->input();
     }
 }
